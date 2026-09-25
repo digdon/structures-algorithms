@@ -203,6 +203,9 @@ func (list *SkipList[T]) Delete(value T) {
 	// Now we look for empty layers and remove them (this should only ever happen at the top level)
 	for list.levels != nil && list.levels.next == nil {
 		list.levels = list.levels.down
+		if list.levels != nil {
+			list.levels.up = nil
+		}
 	}
 }
 
