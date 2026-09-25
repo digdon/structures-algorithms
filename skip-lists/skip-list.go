@@ -20,12 +20,20 @@ func main() {
 		list.Add(letter)
 	}
 
-	list.Add("hello")
-	list.Add("d")
 	list.Display()
 
 	fmt.Println(list.Search("d"))
 	fmt.Println(list.Search("1"))
+
+	// list.Delete("d")
+	// list.Display()
+	for item := list.levels; item != nil; item = item.next {
+		if item.value != nil {
+			fmt.Println("Deleting item", *item.value)
+			list.Delete(*item.value)
+			list.Display()
+		}
+	}
 }
 
 type SkipList[T any] struct {
@@ -171,6 +179,31 @@ func (list *SkipList[T]) Search(value T) (*node[T], bool) {
 	}
 
 	return nil, false
+}
+
+func (list *SkipList[T]) Delete(value T) {
+	pos, found := list.Search(value)
+	if !found {
+		return
+	}
+
+	// Delete item from all layers
+	for pos != nil {
+		if pos.prev != nil {
+			pos.prev.next = pos.next
+		}
+
+		if pos.next != nil {
+			pos.next.prev = pos.prev
+		}
+
+		pos = pos.up
+	}
+
+	// Now we look for empty layers and remove them (this should only ever happen at the top level)
+	for list.levels != nil && list.levels.next == nil {
+		list.levels = list.levels.down
+	}
 }
 
 func (list *SkipList[T]) Display() {
